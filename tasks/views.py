@@ -56,3 +56,11 @@ def create_task(request):
             
     context = {'form' : form}
     return render(request, 'get_post.html',context)
+
+def view_task(request):
+    #for retrieving all data
+    tasks = Task.objects.all()
+
+    #specific task
+    task_3 = Task.objects.get(id=1)
+    return render(request, "show_task.html", {'tasks':tasks, 'task3':task_3})
