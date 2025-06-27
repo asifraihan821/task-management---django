@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from tasks.forms import TaskForm,TaskModelForm
-from tasks.models import Employee,Task
+from tasks.models import Employee,Task,TaskDetail,Project
+from datetime import date
+from django.db.models import Q,Count,Min,Max,Avg
 
 # Create your views here.
 
@@ -56,3 +58,41 @@ def create_task(request):
             
     context = {'form' : form}
     return render(request, 'get_post.html',context)
+
+def view_task(request):
+    #for retrieving all data
+    # tasks = Task.objects.all()
+
+    # #specific task
+    # task_3 = Task.objects.get(id=1)
+
+    # tasks = Task.objects.filter(status="COMPLETED")
+
+    # tasks = Task.objects.filter(due_date = date.today())
+
+    # tasks = Task.objects.filter(title__icontains='c', status='PENDING')
+    # tasks = Task.objects.filter(Q(status = 'PENDING')| Q(status='IN_PROGRESS'))
+
+    # tasks = Task.objects.filter(status='PENDING').exists()
+
+    """"SELECT_RELATED QUERY"""
+
+    # tasks = TaskDetail.objects.select_related('task').all()
+
+    # tasks = Task.objects.select_related('p roject').all()
+    
+    """prefetch_related"""
+    # tasks = Project.objects.prefetch_related('task_set').all()
+    
+    # tasks = Task.objects.prefetch_related('assigned_to').all()
+
+    """aggragate functions"""
+
+    # task_count = Task.objects.aggregate(num_task = Count('id'))
+
+    """annotate functiion"""
+
+    projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
+
+    return render(request, "show_task.html", 
+    {'projects' : projects})
