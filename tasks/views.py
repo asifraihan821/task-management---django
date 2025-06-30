@@ -8,12 +8,27 @@ from django.db.models import Q,Count,Min,Max,Avg
 # Create your views here.
 
 def manager_dashboard(request):
-    tasks = Task.objects.select_related('details').prefetch_related('assigned_to').all()
+
+    base_query = Task.objects.select_related('details').prefetch_related('assigned_to')
 
     # total_task = tasks.count()
     # completed_task = Task.objects.filter(status = 'COMPLETED').count()
     # in_progress_task = Task.objects.filter(status = 'IN_PROGRESS').count()
     # pending_task = Task.objects.filter(status = 'PENDING').count()
+
+    type = request.GET.get('type','all')
+
+    #retreiving task data
+    if type == 'completed':
+        tasks = base_query.filter(status='COMPLETED')
+    elif type =='in_progress':
+        tasks = base_query.filter(status = 'IN_PROGRESS')
+    elif type =='pending':
+        tasks = base_query.filter(status = 'PENDING')
+    elif type =='all':
+        tasks = base_query.all()
+    
+    
 
     counts = Task.objects.aggregate(
         total = Count('id'),

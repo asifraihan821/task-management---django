@@ -34,7 +34,8 @@
             <div class="grid grid-cols-4 gap-6 mb-8">
                 
                  {% comment %} Total Task  1  {% endcomment %}
-                <div class="bg-white rounded-2xl p-6 shadow-md">
+                <a href=" {% url 'manager-dashboard' %}?type=all">
+                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 "> TOTAL TASK</h3>
                     <div class="flex justify-between items-start">
                         <div>
@@ -50,7 +51,9 @@
                         </div>
                     </div>
                 </div>
+                </a>
                  {% comment %} COMPLITED Task  2  {% endcomment %}
+                <a href="{% url 'manager-dashboard' %}?type=completed">
                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 "> COMPLITED TASK</h3>
                     <div class="flex justify-between items-start ">
@@ -68,7 +71,9 @@
                         </div>
                     </div>
                 </div>
+                </a>
                 {% comment %} Task In Progress  3  {% endcomment %}
+                 <a href="{% url 'manager-dashboard' %}?type=in_progress">
                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 ">TASK IN PROGRESS</h3>
                     <div class="flex justify-between items-start ">
@@ -86,7 +91,9 @@
                         </div>
                     </div>
                 </div>
+                </a>
                 {% comment %} TODOS  4 {% endcomment %}
+                 <a href="{% url 'manager-dashboard' %}?type=pending">
                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 "> TODOS</h3>
                     <div class="flex justify-between items-start">
@@ -103,6 +110,8 @@
                         </div>
                     </div>
                 </div>
+                </a>
+
             </div>
 
             {% block tasks %}
