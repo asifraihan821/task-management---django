@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from tasks.forms import TaskForm,TaskModelForm
-from tasks.models import Employee,Task,TaskDetail,Project
+from tasks.forms import TaskForm,TaskModelForm,TaskDetailModelForm
+from tasks.models import Task, Project, TaskDetail
 from datetime import date
-from django.db.models import Q,Count,Min,Max,Avg
+from django.db.models import Q,Count
+from django.contrib import messages
 
 # Create your views here.
 
@@ -58,38 +59,36 @@ def test(request):
     }
     return render(request, 'test.html' , context)
 
+
+'''CRUD Operations
+    C = Create
+    R = Read
+    U = Update
+    D = Delete
+'''
+
+
 def create_task(request):
-    employees = Employee.objects.all()
-    form = TaskModelForm()
+    # employees = Employee.objects.all()
+    task_form = TaskModelForm()
+    task_detail_form = TaskDetailModelForm()
 
     if request.method == 'POST':
-        form = TaskModelForm(request.POST)
-        if form.is_valid():
+        task_form = TaskModelForm(request.POST)
+        task_detail_form = TaskDetailModelForm(request.POST)
+        if task_form.is_valid() and task_detail_form.is_valid():
 
             '''for Model Form Data'''
-            form.save()
+            task = task_form.save()
+            task_detail: TaskDetail = task_detail_form.save(commit=False)
+            task_detail.task = task
+            task_detail.save()
 
-            return render(request, 'get_post.html', {'form':form, 'massage': 'Task Added Successfully'})
+            messages.success(request, 'Task Created Successfully')
 
-
-
-            ''' for Django form Data'''
-            # data = form.cleaned_data
-            # title = data.get('title')
-            # description = data.get('description')
-            # due_date = data.get('due_date')
-            # assigned_to = data.get('assigned_to')
-
-            # task = Task.objects.create(title=title, description=description, due_date= due_date)
+            return redirect('create-task')
             
-            # #assign employee to tasks
-            # for emp_id in assigned_to:
-            #     employee = Employee.objects.get(id=emp_id)
-            #     task.assigned_to.add(employee)  
-
-            # return HttpResponse("task added successfully")
-            
-    context = {'form' : form}
+    context = {'task_form' : task_form, 'task_detail_form': task_detail_form}
     return render(request, 'get_post.html',context)
 
 def view_task(request):
