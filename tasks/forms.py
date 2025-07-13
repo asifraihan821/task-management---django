@@ -16,6 +16,11 @@ class TaskForm(forms.Form):
 
 class StyledFormMixin:
     """mixin to apply in form feild"""
+
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.apply_styled_widget()
+
     default_classes = "border-2 border-gray-300 w-full p-3 rounded-lg shadow-md focus:border-red-400 focus:ring-rose-500 focus:outline-none"
 
     def apply_styled_widget(self):
@@ -44,8 +49,6 @@ class StyledFormMixin:
                 field.widget.attrs.update({
                     'class' : self.default_classes
                 })
-
-
 
 #django model form
 
