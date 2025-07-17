@@ -3,7 +3,7 @@
 {% block tasks %} 
 {% comment %} Task Table {% endcomment %}
 
-<div class="bg-white rounded-xl shadow-sm">
+<div class="bg-white rounded-xl shadow-sm mb-9">
   <div class="grid grid-cols-4 p-4 border-b border-gray-100 text-gray-500">
     <div>Task Title</div>
     <div>Priority</div>
@@ -19,7 +19,7 @@
       <div class="flex items-center gap-4">
         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
         <div>
-          <span class=""> {{task.title}} </span>
+          <a href="{% url 'task-details' task.id %}">{{task.title}}</a>
           {% comment %} for edit button {% endcomment %}
           <a href="{% url 'update-task' task.id %}" class="px-2 py-1 bg-green-500 rounded-md">Edit</a>
         <form action="{% url 'delete-task' task.id%}" method='POST'>

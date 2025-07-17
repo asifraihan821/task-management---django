@@ -5,9 +5,17 @@ from tasks.models import Task, Project, TaskDetail
 from datetime import date
 from django.db.models import Q,Count
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test,login_required,permission_required
 
 # Create your views here.
+def is_manager(user):
+    return user.groups.filter(name='Manager').exists()
 
+def is_employee(user):
+    return user.groups.filter(name='Manager').exists()
+
+
+@user_passes_test(is_manager, login_url='no-permission')
 def manager_dashboard(request):
 
     base_query = Task.objects.select_related('details').prefetch_related('assigned_to')
@@ -44,20 +52,9 @@ def manager_dashboard(request):
     }
     return render(request, "dashboard/manager-dashboard.html", context)
 
-def user_dashboard(request):
+@user_passes_test(is_employee)
+def employee_dashboard(request):
     return render(request, 'dashboard/user-dashboard.html')
-
-def test(request):
-    names =  ["asif", "rahman", "john","mr.x"]
-    count=0
-    for name in names:
-        count +=1
-    context = {
-        "names" :names,
-        "age" : 23,
-        "count" : count
-    }
-    return render(request, 'test.html' , context)
 
 
 '''CRUD Operations
@@ -67,7 +64,8 @@ def test(request):
     D = Delete
 '''
 
-
+@login_required
+@permission_required('tasks.add_task', login_url='no-permission')
 def create_task(request):
     # employees = Employee.objects.all()
     task_form = TaskModelForm()
@@ -91,6 +89,9 @@ def create_task(request):
     context = {'task_form' : task_form, 'task_detail_form': task_detail_form}
     return render(request, 'get_post.html',context)
 
+
+@login_required
+@permission_required('tasks.change_task', login_url='no-permission')
 def update_task(request, id):
     task = Task.objects.get(id=id)
     task_form = TaskModelForm(instance = task)
@@ -116,7 +117,8 @@ def update_task(request, id):
     context = {'task_form' : task_form, 'task_detail_form': task_detail_form}
     return render(request, 'get_post.html',context)
 
-
+@login_required
+@permission_required('tasks.delete_task', login_url='no-permission')
 def delete_task(request, id):
     if request.method =="POST":
         task = Task.objects.get(id=id)
@@ -128,6 +130,9 @@ def delete_task(request, id):
         return redirect('manager-dashboard')
 
 
+
+@login_required
+@permission_required('tasks.view_task', login_url='no-permission')
 def view_task(request):
     #for retrieving all data
     # tasks = Task.objects.all()
@@ -165,3 +170,10 @@ def view_task(request):
 
     return render(request, "show_task.html", 
     {'projects' : projects})
+
+
+@login_required
+@permission_required('tasks.view_task')
+def task_details(request, task_id):
+    task = Task.objects.get(id=task_id)
+    return render(request, 'task_details.html', {'task': task})

@@ -148,3 +148,5 @@ EMAIL_HOST_USER = "asifraihan821@gmail.com"
 EMAIL_HOST_PASSWORD = "ntjo tycn jeif fcuu"
 
 FRONTEND_URL = "http://127.0.0.1:8000"
+
+LOGIN_URL = 'sign-in'
