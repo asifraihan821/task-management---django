@@ -1,44 +1,18 @@
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">                            
-                                                    {% comment %} main dashboard  {% endcomment %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock title %}</title>
-    <link rel="stylesheet" href="{% static "css/output.css" %}">
-</head>
-
-<body class="bg-gray-50 p-6 ">
-    <div class="max-w-[1500px] mx-auto mt-5">
-         {% comment %} header  {% endcomment %}
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-semibold">DashBoard</h1>
-            <div class="flex items-center gap-4">
-                <button class="p-2 rounded-full hover:bg-gray-100 relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                    </svg>
-                </button>
-                <button
-                    class="w-10 h-10 bg-blue-500 rounded-full text-white font-semibold items-center justify-center">B</button>
-            </div>
-        </header>
-
-
-        <main>
-             {% comment %} stats Grid  {% endcomment %}
-            <div class="grid grid-cols-4 gap-6 mb-8">
+ {% extends "base.html" %}
+ {% block content %}
+ 
+ <div class="">
+    {% comment %} stats Grid  {% endcomment %}
+            <div class="grid grid-cols-4 gap-6 my-8">
                 
                  {% comment %} Total Task  1  {% endcomment %}
-                <div class="bg-white rounded-2xl p-6 shadow-md">
+                <a href=" {% url 'manager-dashboard' %}?type=all">
+                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 "> TOTAL TASK</h3>
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-3xl font-semibold mb-1">3</p>
+                            <p class="text-3xl font-semibold mb-1">{{counts.total}} </p>
                             <p class="text-gray-500 text-sm">111 last month</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-full">
@@ -50,12 +24,14 @@
                         </div>
                     </div>
                 </div>
+                </a>
                  {% comment %} COMPLITED Task  2  {% endcomment %}
+                <a href="{% url 'manager-dashboard' %}?type=completed">
                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 "> COMPLITED TASK</h3>
                     <div class="flex justify-between items-start ">
                         <div>
-                            <p class="text-3xl font-semibold mb-1">1</p>
+                            <p class="text-3xl font-semibold mb-1">{{counts.completed}} </p>
                             <p class="text-gray-500 text-sm">111 last month</p>
                         </div>
                         <div class="bg-green-100 p-3 rounded-full">
@@ -68,12 +44,14 @@
                         </div>
                     </div>
                 </div>
+                </a>
                 {% comment %} Task In Progress  3  {% endcomment %}
+                 <a href="{% url 'manager-dashboard' %}?type=in_progress">
                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 ">TASK IN PROGRESS</h3>
                     <div class="flex justify-between items-start ">
                         <div>
-                            <p class="text-3xl font-semibold mb-1">1</p>
+                            <p class="text-3xl font-semibold mb-1">{{counts.in_progress }} </p>
                             <p class="text-gray-500 text-sm">111 last month</p>
                         </div>
                         <div class="bg-yellow-100 p-3 rounded-full">
@@ -86,12 +64,14 @@
                         </div>
                     </div>
                 </div>
+                </a>
                 {% comment %} TODOS  4 {% endcomment %}
+                 <a href="{% url 'manager-dashboard' %}?type=pending">
                 <div class="bg-white rounded-2xl p-6 shadow-md">
                     <h3 class="text-sm font-medium text-gray-500 mb-4 "> TODOS</h3>
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-3xl font-semibold mb-1">1</p>
+                            <p class="text-3xl font-semibold mb-1"> {{counts.pending}} </p>
                             <p class="text-gray-500 text-sm">111 last month</p>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-full">
@@ -103,18 +83,18 @@
                         </div>
                     </div>
                 </div>
+                </a>
+
             </div>
+            {% if messages %}
+          {% for message in messages %}
+            <div class="px-2 py-1 {% if message.tags == 'success' %}bg-green-500{% endif %} "> {{message}}</div>
+          {% endfor %}
+        {% endif %}
 
             {% block tasks %}
              
             {% endblock tasks %}
+ </div>
 
-        </main>
-    </div>
-    </div>
-
-    {% include "footer.html" %}
-
-</body>
-
-</html>
+            {% endblock content %}
