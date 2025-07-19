@@ -6,6 +6,7 @@ from datetime import date
 from django.db.models import Q,Count
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test,login_required,permission_required
+from users.views import is_admin
 
 # Create your views here.
 def is_manager(user):
@@ -134,40 +135,7 @@ def delete_task(request, id):
 @login_required
 @permission_required('tasks.view_task', login_url='no-permission')
 def view_task(request):
-    #for retrieving all data
-    # tasks = Task.objects.all()
-
-    # #specific task 
-    # task_3 = Task.objects.get(id=1)
-
-    # tasks = Task.objects.filter(status="COMPLETED")
-
-    # tasks = Task.objects.filter(due_date = date.today())
-
-    # tasks = Task.objects.filter(title__icontains='c', status='PENDING')
-    # tasks = Task.objects.filter(Q(status = 'PENDING')| Q(status='IN_PROGRESS'))
-
-    # tasks = Task.objects.filter(status='PENDING').exists()
-
-    """"SELECT_RELATED QUERY"""
-
-    # tasks = TaskDetail.objects.select_related('task').all()
-
-    # tasks = Task.objects.select_related('p roject').all()
-    
-    """prefetch_related"""
-    # tasks = Project.objects.prefetch_related('task_set').all()
-    
-    # tasks = Task.objects.prefetch_related('assigned_to').all()
-
-    """aggragate functions"""
-
-    # task_count = Task.objects.aggregate(num_task = Count('id'))
-
-    """annotate functiion"""
-
     projects = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
-
     return render(request, "show_task.html", 
     {'projects' : projects})
 
@@ -176,4 +144,25 @@ def view_task(request):
 @permission_required('tasks.view_task')
 def task_details(request, task_id):
     task = Task.objects.get(id=task_id)
-    return render(request, 'task_details.html', {'task': task})
+    status_choices = Task.STATUS_CHOICES
+
+    if request.method  =='POST':
+        selected_status = request.POST.get('task_status')
+        task.status = selected_status
+        task.save()
+        return redirect ('task-details', task.id)
+
+    return render(request, 'task_details.html', {'task': task, 'status_choices':status_choices})
+
+
+@login_required
+def dashboard(request):
+    if is_admin(request.user):
+        return redirect('admin-dashboard')
+    elif is_manager(request.user):
+        return redirect('manager-dashboard')
+    elif is_employee(request.user):
+        return redirect('user-dashboard')
+    
+    
+    return redirect('no-permission')

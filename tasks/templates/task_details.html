@@ -25,21 +25,24 @@
           Task Detail
         </button>
         <div class="flex items-center gap-2">
-          <select
-            name="task_status"
-            id="task_status"
-            class="px-4 py-2 border rounded-md"
-          >
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <button
-            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            type="submit"
-          >
-            Change Status
-          </button>
+          <form method="POST">
+            {% csrf_token %}
+              <select
+              name="task_status"
+              id="task_status"
+              class="px-4 py-2 border rounded-md"
+            >
+            {% for value,label in status_choices %}
+                <option value="{{value}}">{{label}}</option>
+              {% endfor %}
+            </select>
+            <button
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              type="submit"
+            >
+              Change Status
+            </button>
+          </form>
         </div>
       </div>
 
@@ -78,13 +81,14 @@
                 {% endfor %}
               </div>
             </div>
-            <div>
-              <button
-                class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                type="submit"
-              >
-                Delete Task
-              </button>
+            <div class="flex gap-5">
+                    {% comment %} for edit button {% endcomment %}
+                <a href="{% url 'update-task' task.id %}" class="px-2 py-1 bg-green-500 rounded-md">Edit</a>
+              <form action="{% url 'delete-task' task.id%}" method='POST'>
+                {% comment %} for delete button  {% endcomment %}
+                {% csrf_token %}
+                <button type='submit' class="px-2 py-1 bg-red-500 rounded-md">Delete</button>
+              </form>
             </div>
           </div>
         </div>
@@ -104,7 +108,7 @@
             <h2 class="text-xl font-bold mb-4">ASSETS</h2>
             <div class="space-y-4">
               <img
-                src="{{task.details.asset.url}}"
+                src={{task.details.asset.url}}
                 alt="Task Manager App Screenshot 1"
                 class="w-full rounded-lg"
               />
