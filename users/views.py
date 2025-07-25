@@ -9,6 +9,8 @@ from users.forms import LoginForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Prefetch
+from django.contrib.auth.views import LoginView
+from django.views.generic import TemplateView
 
 # Create your views here.
 def is_admin(user):
@@ -41,6 +43,35 @@ def sign_in(request):
             login(request, user)
             return redirect('home')
     return render(request, 'registration/login.html', {'form': form})
+
+
+
+class ProfileView(TemplateView):
+    template_name = 'accounts/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        context['username'] = user.username
+        context['email'] = user.email
+        # ✅ context['name'] = f'{user.first_name} {user.last_name}'
+        context['name'] = user.get_full_name()
+
+        context['member_since'] = user.date_joined
+        context['last_login'] = user.last_login
+
+        return context
+
+
+class CustomLoginView(LoginView):
+    form_class = LoginForm
+
+    def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        return next_url if next_url else super().get_success_url()
+
+
 
 @login_required
 def sign_out(request):
