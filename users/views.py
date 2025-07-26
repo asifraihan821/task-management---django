@@ -128,7 +128,7 @@ def activate_user(request, user_id, token):
             return HttpResponse('Invalid id or token')
         
     except User.DoesNotExist:
-        return HttpResponse('user not found')
+        return HttpResponse('user not found') 
 
 
 @user_passes_test(is_admin, login_url='no-permission')
