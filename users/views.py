@@ -1,19 +1,67 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate,login,logout
-from django.contrib.auth.models import User,Group
+from django.contrib.auth.models import Group
 from django.contrib.auth.forms import UserCreationForm
-from users.forms import RegisterForm,CustomRegistrationForm, AssignedRoleForm,CreateGroupForm,CustomPasswordChangeForm,CustomPasswordResetForm,CustomPasswordResetConfirmForm
+from users.forms import RegisterForm,EditProfileForm,CustomRegistrationForm, AssignedRoleForm,CreateGroupForm,CustomPasswordChangeForm,CustomPasswordResetForm,CustomPasswordResetConfirmForm
 from django.contrib import messages
 from users.forms import LoginForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Prefetch
 from django.contrib.auth.views import LoginView,PasswordChangeView,PasswordResetView,PasswordResetConfirmView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView,UpdateView
 from django.urls import reverse_lazy
+from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
+
+User = get_user_model()
 
 # Create your views here.
+
+"""
+
+class EditProfileView(UpdateView):
+    model = User
+    form_class = EditProfileForm
+    template_name = 'accounts/update_profile.html'
+    context_object_name = 'form'
+
+    def get_object(self):
+        return self.request.user
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['userprofile'] = UserProfile.objects.get(user = self.request.user)
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_profile = UserProfile.objects.get(user=self.request.user)
+        context['form'] = self.form_class(instance=self.object, userprofile=user_profile)
+
+        return context
+    
+    def form_valid(self,form):
+        form.save(commit=True)
+        return redirect('profile')
+        
+        """
+
+class EditProfileView(UpdateView):
+    model = User
+    form_class = EditProfileForm
+    template_name = 'accounts/update_profile.html'
+    context_object_name = 'form'
+
+    def get_object(self):
+        return self.request.user
+    
+    def form_valid(self,form):
+        form.save()
+        return redirect('profile')
+
+
 def is_admin(user):
     return user.groups.filter(name='Admin').exists()
 
@@ -35,6 +83,7 @@ def sign_up(request):
     return render(request, 'registration/register.html',{ 'form':form})
 
 
+"""
 def sign_in(request):
     form = LoginForm()
     if request.method == 'POST':
@@ -45,6 +94,15 @@ def sign_in(request):
             return redirect('home')
     return render(request, 'registration/login.html', {'form': form})
 
+"""
+
+
+class CustomLoginView(LoginView):
+    form_class = LoginForm
+
+    def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        return next_url if next_url else super().get_success_url()
 
 
 class ProfileView(TemplateView):
@@ -58,6 +116,9 @@ class ProfileView(TemplateView):
         context['email'] = user.email
         # ✅ context['name'] = f'{user.first_name} {user.last_name}'
         context['name'] = user.get_full_name()
+        context['bio'] = user.bio
+        context['profile_image'] = user.profile_image
+
 
         context['member_since'] = user.date_joined
         context['last_login'] = user.last_login
@@ -65,12 +126,7 @@ class ProfileView(TemplateView):
         return context
 
 
-class CustomLoginView(LoginView):
-    form_class = LoginForm
 
-    def get_success_url(self):
-        next_url = self.request.GET.get('next')
-        return next_url if next_url else super().get_success_url()
 
 
 
@@ -142,6 +198,7 @@ def admin_dashboard(request):
         else:
             user.group_name = 'NO group assigned'
     return render(request, 'admin/dashboard.html', {'users':users})
+
 
 @user_passes_test(is_admin, login_url='no-permission')
 def assigned_role(request, user_id):
