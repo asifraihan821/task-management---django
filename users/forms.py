@@ -1,9 +1,13 @@
-from django.contrib.auth.models import User,Permission,Group
+from django.contrib.auth.models import Permission,Group
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 import re
 from tasks.forms import StyledFormMixin
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm,PasswordChangeForm,PasswordResetForm,SetPasswordForm
+from users.models import CustomUser
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class RegisterForm(UserCreationForm):
@@ -82,6 +86,10 @@ class AssignedRoleForm(forms.Form):
         empty_label='Select a Role',
     )
 
+    class Meta:
+        model = User
+        fields = []
+
 
 class CreateGroupForm(StyledFormMixin, forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(
@@ -94,3 +102,60 @@ class CreateGroupForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Group
         fields = ['name','permissions']
+
+
+class CustomPasswordChangeForm(StyledFormMixin,PasswordChangeForm):
+    pass
+
+
+class CustomPasswordResetForm(StyledFormMixin,PasswordResetForm):
+    pass
+
+
+class CustomPasswordResetConfirmForm(StyledFormMixin,SetPasswordForm):
+    pass
+
+
+"""
+class EditProfileForm(StyledFormMixin, forms.ModelForm):
+    class Meta: 
+        model = User
+        fields = ['email', 'first_name','last_name']
+
+    bio = forms.CharField(required=False, widget=forms.Textarea, label='bio')
+    profile_image = forms.ImageField(required=False, label='profile_image')
+
+    def __init__(self,*args,**kwargs):
+        self.userprofile = kwargs.pop('userprofile',None)
+        super().__init__(*args,**kwargs)
+        print('forms',self.userprofile)
+
+        # Todo: handle error
+
+        if self.userprofile:
+            self.fields['bio'].initial = self.userprofile.bio
+            self.fields['profile_image'].initial = self.userprofile.profile_image
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        #save userprofile jodi thake
+
+        if self.userprofile:
+            self.userprofile.bio = self.cleaned_data.get('bio')
+            self.userprofile.profile_image = self.cleaned_data.get('profile_image')
+
+            if commit:
+                self.userprofile.save()
+            
+        if commit:
+            user.save()
+
+        return user
+    """
+
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'first_name', 'last_name','bio','profile_image']
