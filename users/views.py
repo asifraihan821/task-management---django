@@ -200,6 +200,24 @@ def admin_dashboard(request):
     return render(request, 'admin/dashboard.html', {'users':users})
 
 
+@method_decorator(user_passes_test(is_admin,login_url='no-permission'),name='dispatch')
+class AdminDashboard(TemplateView):
+    template_name = 'admin/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        users = User.objects.prefetch_related(Prefetch('groups', queryset=Group.objects.all(), to_attr='all_groups')).all()
+        for user in users:
+            if user.all_groups:
+                user.group_name = user.all_groups[0].name
+            else:
+                user.group_name = 'NO group assigned'
+
+        context['users'] = users
+        return context
+
+
+
 @user_passes_test(is_admin, login_url='no-permission')
 def assigned_role(request, user_id):
     user = User.objects.get(id = user_id)
