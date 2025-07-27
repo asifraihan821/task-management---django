@@ -14,7 +14,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.base import ContextMixin
 from django.views.generic import ListView,DetailView
-from django.views.generic import CreateView
+from django.views.generic import CreateView,TemplateView
+
 
 
 class Greetings(View):
@@ -73,6 +74,42 @@ def manager_dashboard(request):
         'counts':counts
     }
     return render(request, "dashboard/manager-dashboard.html", context)
+
+
+@method_decorator(user_passes_test(is_manager,login_url='no-permission'),name='dispatch')
+class ManagerDashboard(TemplateView):
+    template_name = 'dashboard/manager-dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        base_query = Task.objects.select_related('details').prefetch_related('assigned_to')
+
+        type = self.request.GET.get('type','all')
+
+        #retreiving task data
+        if type == 'completed':
+            tasks = base_query.filter(status='COMPLETED')
+        elif type =='in_progress':
+            tasks = base_query.filter(status = 'IN_PROGRESS')
+        elif type =='pending':
+            tasks = base_query.filter(status = 'PENDING')
+        elif type =='all':
+            tasks = base_query.all()
+        
+    
+        counts = Task.objects.aggregate(
+            total = Count('id'),
+            completed = Count('id',filter = Q(status = 'COMPLETED')),
+            in_progress = Count('id',filter = Q(status = 'IN_PROGRESS')),
+            pending = Count('id',filter = Q(status = 'PENDING'))
+        )
+
+        context['tasks'] = tasks
+        context['counts'] = counts
+
+        return context
+
+
 
 @user_passes_test(is_employee,login_url='no-permission')
 def employee_dashboard(request):
