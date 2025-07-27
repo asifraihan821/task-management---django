@@ -10,7 +10,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Prefetch
 from django.contrib.auth.views import LoginView,PasswordChangeView,PasswordResetView,PasswordResetConfirmView
-from django.views.generic import TemplateView,UpdateView
+from django.views.generic import TemplateView,UpdateView,CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
@@ -233,6 +233,8 @@ def assigned_role(request, user_id):
             return redirect('admin-dashboard')
     return render(request, 'admin/assign_role.html', {'form': form})
 
+
+"""
 @user_passes_test(is_admin, login_url='no-permission')
 def create_group(request):
     form = CreateGroupForm()
@@ -245,6 +247,25 @@ def create_group(request):
             return redirect('create-group')
     
     return render(request, 'admin/create_group.html', {'form': form})
+
+"""
+@method_decorator(user_passes_test(is_admin,login_url='no-permission'), name='dispatch')
+class CreateGroup(CreateView):
+    form_class = CreateGroupForm
+    template_name = 'admin/create_group.html'
+
+    def post(self, request, *args, **kwargs):
+        form = CreateGroupForm(request.POST)
+
+        if form.is_valid():
+            group = form.save()
+            messages.success(request, f'Group {group.name} has been added successfully')
+            return redirect('create-group')
+    
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)
+        
+
 
 @user_passes_test(is_admin, login_url='no-permission')
 def group_list(request):
