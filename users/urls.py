@@ -1,6 +1,7 @@
 from django.urls import path
 from users.views import sign_up,activate_user,CustomLoginView,ProfileView,ChangePassword,CustomPasswordResetView,CustomPasswordResetConfirmView,EditProfileView,AdminDashboard,CreateGroup,GroupList,AssignRole2
 from django.contrib.auth.views import LogoutView,PasswordChangeDoneView
+from tasks.views import CreateProject
 
 
 urlpatterns = [
@@ -23,5 +24,6 @@ urlpatterns = [
     path('password_change/done/',PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'), name='password_change_done'),
     path('password-reset/', CustomPasswordResetView.as_view(), name='password-reset'),
     path('password-reset/confirm/<uidb64>/<token>/',CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('edit-profile/', EditProfileView.as_view(), name='edit-profile')
+    path('edit-profile/', EditProfileView.as_view(), name='edit-profile'),
+    path('create-project/',CreateProject.as_view(), name = 'create-project')
 ]

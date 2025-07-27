@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from tasks.forms import TaskForm,TaskModelForm,TaskDetailModelForm
+from tasks.forms import TaskForm,TaskModelForm,TaskDetailModelForm,CreateProjectForm
 from tasks.models import Task, Project, TaskDetail
 from datetime import date
 from django.db.models import Q,Count
@@ -14,6 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.base import ContextMixin
 from django.views.generic import ListView,DetailView
+from django.views.generic import CreateView
 
 
 class Greetings(View):
@@ -85,6 +86,7 @@ def employee_dashboard(request):
     D = Delete
 '''
 
+"""
 @permission_required('tasks.add_task', login_url='no-permission')
 def create_task(request):
     # employees = Employee.objects.all()
@@ -111,6 +113,26 @@ def create_task(request):
 
 
 create_decorators = [login_required, permission_required('tasks.add_task', login_url='no-permission')]
+
+"""
+class CreateProject(CreateView):
+    model = Project
+    form_class = CreateProjectForm
+    context_object_name = 'form'
+    template_name = 'admin/create_project.html'
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'Project created Successfully.')
+        return redirect( 'admin-dashboard')
+    
+
 
 class CreateTask(ContextMixin, LoginRequiredMixin,PermissionRequiredMixin,  View):
     """creating task..."""
@@ -145,6 +167,7 @@ class CreateTask(ContextMixin, LoginRequiredMixin,PermissionRequiredMixin,  View
 
 
 
+"""
 @login_required
 @permission_required('tasks.change_task', login_url='no-permission')
 def update_task(request, id):
@@ -175,6 +198,7 @@ def update_task(request, id):
 
 change_decorators = [permission_required('tasks.change_task', login_url='no-permission')]
 
+"""
 class UpdateTask(UpdateView):
     model = Task
     form_class = TaskModelForm
@@ -226,6 +250,7 @@ def delete_task(request, id):
         return redirect('manager-dashboard')
 
 
+"""
 
 @login_required
 @permission_required('tasks.view_task', login_url='no-permission')
@@ -234,9 +259,9 @@ def view_task(request):
     return render(request, "show_task.html", 
     {'projects' : projects})
 
+"""
 
 view_project_decorators = [permission_required('projects.view_project', login_url='no-permission')]
-
 @method_decorator(view_project_decorators, name = 'dispatch')
 class ViewProject(ListView):
     model = Project

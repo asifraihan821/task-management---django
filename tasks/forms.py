@@ -1,5 +1,5 @@
 from django import forms
-from tasks.models import Task,TaskDetail
+from tasks.models import Task,TaskDetail,Project
 
 class TaskForm(forms.Form):
     title = forms.CharField(max_length=250, label='Task Title')
@@ -12,6 +12,8 @@ class TaskForm(forms.Form):
         employees = kwargs.pop("employees", [])
         super().__init__(*args, **kwargs)
         self.fields['assigned_to'].choices = [(emp.id,  emp.name) for emp in employees]
+
+
 
 
 class StyledFormMixin:
@@ -78,3 +80,16 @@ class TaskDetailModelForm(StyledFormMixin,forms.ModelForm):
     # def __init__(self,*args,**kwargs):
     #     super().__init__(*args,**kwargs)
     #     self.apply_styled_widget()
+
+
+
+
+class CreateProjectForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ['name', 'description', 'start_date']
+
+        widgets = {
+            'description' : forms.Textarea,
+            'start_date' : forms.SelectDateWidget
+        }
