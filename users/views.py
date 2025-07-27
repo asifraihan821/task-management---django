@@ -10,7 +10,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Prefetch
 from django.contrib.auth.views import LoginView,PasswordChangeView,PasswordResetView,PasswordResetConfirmView
-from django.views.generic import TemplateView,UpdateView,CreateView
+from django.views.generic import TemplateView,UpdateView,CreateView,ListView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
@@ -186,6 +186,7 @@ def activate_user(request, user_id, token):
     except User.DoesNotExist:
         return HttpResponse('user not found') 
 
+"""
 
 @user_passes_test(is_admin, login_url='no-permission')
 def admin_dashboard(request):
@@ -200,6 +201,8 @@ def admin_dashboard(request):
     return render(request, 'admin/dashboard.html', {'users':users})
 
 
+
+"""
 @method_decorator(user_passes_test(is_admin,login_url='no-permission'),name='dispatch')
 class AdminDashboard(TemplateView):
     template_name = 'admin/dashboard.html'
@@ -266,8 +269,22 @@ class CreateGroup(CreateView):
         return super().get_context_data(**kwargs)
         
 
+"""
 
 @user_passes_test(is_admin, login_url='no-permission')
 def group_list(request):
     groups = Group.objects.prefetch_related('permissions').all()
     return render(request, 'admin/group_list.html', {'groups':groups})
+
+
+
+"""
+
+@method_decorator(user_passes_test(is_admin,login_url='no-permission'), name='dispatch')
+class GroupList(ListView):
+    model = Group
+    template_name = 'admin/group_list.html'
+    context_object_name = 'groups'
+    
+    def get_queryset(self):
+        return Group.objects.prefetch_related('permissions').all()

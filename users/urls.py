@@ -1,5 +1,5 @@
 from django.urls import path
-from users.views import sign_up,activate_user,admin_dashboard,assigned_role,group_list,CustomLoginView,ProfileView,ChangePassword,CustomPasswordResetView,CustomPasswordResetConfirmView,EditProfileView,AdminDashboard,CreateGroup
+from users.views import sign_up,activate_user,assigned_role,CustomLoginView,ProfileView,ChangePassword,CustomPasswordResetView,CustomPasswordResetConfirmView,EditProfileView,AdminDashboard,CreateGroup,GroupList
 from django.contrib.auth.views import LogoutView,PasswordChangeView,PasswordChangeDoneView
 from django.views.generic import CreateView
 
@@ -15,7 +15,8 @@ urlpatterns = [
     path('admin/<int:user_id>/assign-role/', assigned_role, name='assign-role'),
     # path('create-group/', create_group, name= 'create-group'),
     path('create-group/', CreateGroup.as_view(), name= 'create-group'),
-    path('admin/group-list/',group_list,name='group-list'),
+    # path('admin/group-list/',group_list,name='group-list'),
+    path('admin/group-list/', GroupList.as_view(),name='group-list'),
     path('profile/', ProfileView.as_view(),name='profile'),
     path('password-changed/', ChangePassword.as_view(),name='password_changed'),
     path('password_change/done/',PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'), name='password_change_done'),

@@ -33,7 +33,7 @@ def is_manager(user):
     return user.is_authenticated and user.groups.filter(name='Manager').exists()
 
 def is_employee(user):
-    return user.groups.filter(name='Manager').exists()
+    return user.groups.filter(name='User').exists()
 
 
 @user_passes_test(is_manager, login_url='no-permission')
@@ -73,7 +73,7 @@ def manager_dashboard(request):
     }
     return render(request, "dashboard/manager-dashboard.html", context)
 
-@user_passes_test(is_employee)
+@user_passes_test(is_employee,login_url='no-permission')
 def employee_dashboard(request):
     return render(request, 'dashboard/user-dashboard.html')
 
