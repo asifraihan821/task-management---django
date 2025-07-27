@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import Group
@@ -10,7 +10,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Prefetch
 from django.contrib.auth.views import LoginView,PasswordChangeView,PasswordResetView,PasswordResetConfirmView
-from django.views.generic import TemplateView,UpdateView,CreateView,ListView
+from django.views.generic import TemplateView,UpdateView,CreateView,ListView,FormView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
@@ -220,6 +220,7 @@ class AdminDashboard(TemplateView):
         return context
 
 
+"""
 
 @user_passes_test(is_admin, login_url='no-permission')
 def assigned_role(request, user_id):
@@ -236,6 +237,43 @@ def assigned_role(request, user_id):
             return redirect('admin-dashboard')
     return render(request, 'admin/assign_role.html', {'form': form})
 
+
+
+"""
+@method_decorator(user_passes_test(is_admin,login_url='no-permission'), name='dispatch')
+class AssignRole(UpdateView):
+    model = User
+    form_class = AssignedRoleForm
+    context_object_name = 'form'
+    template_name = 'admin/assign_role.html'
+    pk_url_kwarg = 'user_id'
+ 
+    def form_valid(self, form):
+        role = form.cleaned_data.get('role')
+        user = self.object
+        user.groups.clear() # removes old roels
+        user.groups.add(role)
+        messages.success(self.request,f'user {user.username} has been asigned to the {role.name} role')
+        return redirect('admin-dashboard')
+
+
+@method_decorator(user_passes_test(is_admin,login_url='no-permission'), name='dispatch')
+class AssignRole2(FormView):
+
+    form_class = AssignedRoleForm
+    template_name = 'admin/assign_role.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.user = get_object_or_404(User,pk=kwargs.get('user_id'))
+        return super().dispatch(request, *args, **kwargs)
+ 
+    def form_valid(self, form):
+        role = form.cleaned_data.get('role')
+        self.user.groups.clear() # removes old roels
+        self.user.groups.add(role)
+        messages.success(self.request,f'user {self.user.username} has been asigned to the {role.name} role')
+        return redirect('admin-dashboard')
+    
 
 """
 @user_passes_test(is_admin, login_url='no-permission')

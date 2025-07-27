@@ -86,6 +86,10 @@ class AssignedRoleForm(forms.Form):
         empty_label='Select a Role',
     )
 
+    class Meta:
+        model = User
+        fields = []
+
 
 class CreateGroupForm(StyledFormMixin, forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(
