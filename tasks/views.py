@@ -13,8 +13,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.base import ContextMixin
-from django.views.generic import ListView,DetailView
+from django.views.generic import ListView,DetailView,DeleteView
 from django.views.generic import CreateView,TemplateView
+from django.urls import reverse_lazy
 
 
 
@@ -164,6 +165,8 @@ def create_task(request):
 create_decorators = [login_required, permission_required('tasks.add_task', login_url='no-permission')]
 
 """
+
+@method_decorator(user_passes_test(is_admin, login_url='no-permission'),name='dispatch')
 class CreateProject(CreateView):
     model = Project
     form_class = CreateProjectForm
@@ -187,7 +190,7 @@ class CreateTask(ContextMixin, LoginRequiredMixin,PermissionRequiredMixin,  View
     """creating task..."""
     permission_required = 'tasks.add_task'
     login_url = 'sign-in'
-    template_name = 'get_post.html'
+    template_name = 'dashboard/manager-dashboard.html'
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
@@ -212,7 +215,7 @@ class CreateTask(ContextMixin, LoginRequiredMixin,PermissionRequiredMixin,  View
 
             messages.success(request, 'Task Created Successfully')
             context = self.get_context_data(task_form = task_form, task_detail_form = task_detail_form)
-            return render(request, self.template_name, context)
+            return redirect('manager-dashboard')
 
 
 
@@ -299,6 +302,19 @@ def delete_task(request, id):
         return redirect('manager-dashboard')
 
 
+class DeleteTask(DeleteView):
+    model = Task
+    pk_url_kwarg = 'id'
+    success_url = reverse_lazy('manager-dashboard')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Task deleted successfully')
+        # return super().delete(request, *args, **kwargs)
+
+
+
+
+
 """
 
 @login_required
@@ -315,7 +331,7 @@ view_project_decorators = [permission_required('projects.view_project', login_ur
 class ViewProject(ListView):
     model = Project
     context_object_name = 'projects'
-    template_name = 'show_task.html' 
+    template_name = 'show_project.html' 
 
     def get_queryset(self):
         queryset = Project.objects.annotate(num_task=Count('task')).order_by('num_task')
